@@ -25,11 +25,11 @@ Note: It is very important to clone this repository on the top-level $HOME direc
 ```
 ## Installation
 
-Use stow to install confs to $HOME
+Invoke the install script to install confs to $HOME
 
 ```bash
   cd dotfiles
-  stow .
+  ./install.sh
 ```
 
 ## License
