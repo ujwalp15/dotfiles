@@ -5,6 +5,9 @@ dotfiles_dir="$HOME/dotfiles"
 
 # Prepare dotfiles before installation
 prepare_dotfiles() {
+    # Cleanup custom directory
+    rm -rf $dotfiles_dir/.config/nvim/lua/custom
+
     # Fetch and update submodules
     git submodule update --init --recursive
 
