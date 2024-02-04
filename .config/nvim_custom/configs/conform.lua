@@ -9,13 +9,13 @@ local options = {
 		html = { "prettier" },
 
 		sh = { "shfmt" },
-	  c = { "clang_format" },
-	  cpp = { "clang_format" },
+	    c = { "clang_format" },
+	    cpp = { "clang_format" },
 
-    python = { "black", "isort" },
-    yaml = { "yamlfmt" },
-    json = { "prettier" },
-  },
+        python = { "black", "isort" },
+        yaml = { "yamlfmt" },
+        json = { "prettier" },
+    },
 
   -- adding same formatter for multiple filetypes can look too much work for some
   -- instead of the above code you could just use a loop! the config is just a table after all!
