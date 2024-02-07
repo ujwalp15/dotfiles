@@ -26,20 +26,20 @@
 [pull]
 	rebase = true
 [core]
-    editor = vim
-    whitespace = -trailing-space
+  editor = vim
+  whitespace = -trailing-space
 [init]
 	defaultBranch = main
 [diff]
-    submodule = log
-    mnemonicPrefix = true
-    renames = true
+  submodule = log
+  mnemonicPrefix = true
+  renames = true
 [fetch]
-    recurseSubmodules = on-demand
+  recurseSubmodules = on-demand
 [log]
-    abbrevCommit = true
-    follow = true
-    decorate = false
+  abbrevCommit = true
+  follow = true
+  decorate = false
 [status]
-    submoduleSummary = true
-    showUntrackedFiles = all
+  submoduleSummary = false
+  showUntrackedFiles = all
