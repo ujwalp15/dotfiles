@@ -5,14 +5,8 @@ dotfiles_dir="$HOME/dotfiles"
 
 # Prepare dotfiles before installation
 prepare_dotfiles() {
-    # Cleanup custom directory
-    rm -rf $dotfiles_dir/.config/nvim/lua/custom
-
     # Fetch and update submodules
     git submodule update --init --recursive
-
-    # Symlink nvim custom conf
-    ln -s $dotfiles_dir/.config/nvim_custom $dotfiles_dir/.config/nvim/lua/custom
 }
 
 # Install dotfiles using Stow
@@ -46,4 +40,3 @@ prepare_dotfiles
 install_dotfiles
 
 echo "Dotfiles installation completed."
-
