@@ -9,3 +9,4 @@ alias gerritpk="git push ssh://ujwalp@gitreview.eng.vmware.com:29418/$(git confi
 alias gerritpl="git push ssh://ujwalp@gitreview.eng.vmware.com:29418/$(git config --get remote.origin.url | sed -e 's#.*/##; s#.git$##') HEAD:refs/for/nsx-longview42"
 alias gerritp="git push ssh://ujwalp@gitreview.eng.vmware.com:29418/$(git config --get remote.origin.url | sed -e 's#.*/##; s#.git$##') HEAD:refs/for/$(git branch --show-current)"
 alias vim="nvim"
+alias tmux="tmux -u"
