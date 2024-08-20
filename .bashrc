@@ -105,3 +105,12 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 export PATH="$PATH:/opt/nvim/:~/bin"
 export NODE_OPTIONS=--max-old-space-size=8192
+
+# Check if a tmux session exists and attach to it
+if command -v tmux >/dev/null 2>&1; then
+    if [ -z "$TMUX" ]; then
+        if tmux ls 2>/dev/null | grep -q "^"; then
+            tmux attach -t $(tmux ls | grep -o '^[^:]\+')
+        fi
+    fi
+fi
