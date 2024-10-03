@@ -1,1 +1,6 @@
 .git
+README.md
+LICENSE
+install.sh
+.gitmodules
+.gitignore
