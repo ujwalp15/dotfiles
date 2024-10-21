@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the dotfiles directory
-dotfiles_dir="$HOME/dotfiles"
+dotfiles_dir="$PWD/dotfiles"
 
 # Prepare dotfiles before installation
 prepare_dotfiles() {
