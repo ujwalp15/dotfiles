@@ -110,7 +110,7 @@ export NODE_OPTIONS=--max-old-space-size=8192
 if command -v tmux >/dev/null 2>&1; then
     if [ -z "$TMUX" ]; then
         if tmux ls 2>/dev/null | grep -q "^"; then
-            tmux attach -t $(tmux ls | grep -o '^[^:]\+')
+            tmux at
         fi
     fi
 fi
