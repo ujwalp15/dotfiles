@@ -11,7 +11,7 @@ prepare_dotfiles() {
 
 # Install dotfiles using Stow
 install_dotfiles() {
-    stow .
+    stow --target $HOME
 }
 
 # Main script execution
