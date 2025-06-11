@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# List of additional packages to install
+PACKAGES=(
+    "stow"
+    "eza"
+    "zoxide"
+    "fd-find"
+    "ripgrep"
+    "bat"
+    "fzf"
+    "starship"
+)
+
 # Detect the operating system
 detect_os() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -11,30 +23,105 @@ detect_os() {
     fi
 }
 
-# Install Stow based on the operating system
-install_stow() {
-    os=$(detect_os)
+# Check if a command exists with alternative names
+command_exists() {
+    local cmd="$1"
+    case $cmd in
+        "fd-find") command -v fd &> /dev/null || command -v fdfind &> /dev/null ;;
+        *) command -v "$cmd" &> /dev/null ;;
+    esac
+}
+
+# Get missing packages from the provided list
+get_missing_packages() {
+    local packages=("$@")
+    local missing=()
+
+    for package in "${packages[@]}"; do
+        if ! command_exists "$package"; then
+            missing+=("$package")
+        else
+            echo "✓ $package already installed" >&2
+        fi
+    done
+
+    printf '%s\n' "${missing[@]}"
+}
+
+# Install packages using specified package manager
+install_with_manager() {
+    local manager="$1"
+    shift
+    local packages=("$@")
+
+    for package in "${packages[@]}"; do
+        local actual_package="$package"
+
+        # Handle package name mappings
+        case $manager in
+            "pacman")
+                case $package in
+                    "fd-find") actual_package="fd" ;;
+                esac
+                ;;
+            "brew")
+                case $package in
+                    "fd-find") actual_package="fd" ;;
+                esac
+                ;;
+        esac
+
+        # Install the package quietly, ignore errors
+        echo "Installing $actual_package..."
+        case $manager in
+            "apt") sudo apt install "$actual_package" -y &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
+            "yum") sudo yum install "$actual_package" -y &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
+            "dnf") sudo dnf install "$actual_package" -y &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
+            "pacman") sudo pacman -S "$actual_package" --noconfirm &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
+            "brew") brew install "$actual_package" &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
+        esac
+    done
+}
+
+# Install packages based on the operating system
+install_packages() {
+    local os=$(detect_os)
+    local packages_to_install=("${PACKAGES[@]}")
+
+    echo "Checking for missing packages on $os..."
+
+    # Get missing packages
+    local missing_packages
+    readarray -t missing_packages < <(get_missing_packages "${packages_to_install[@]}")
+
+    if [ ${#missing_packages[@]} -eq 0 ]; then
+        echo "All packages are already installed!"
+        return
+    fi
 
     case $os in
         "linux")
-            echo "Installing Stow on Linux..."
             if command -v apt &> /dev/null; then
-                sudo apt update && sudo apt install stow -y
+                echo "Using apt package manager..."
+                install_with_manager "apt" "${missing_packages[@]}"
             elif command -v yum &> /dev/null; then
-                sudo yum install stow -y
+                echo "Using yum package manager..."
+                install_with_manager "yum" "${missing_packages[@]}"
             elif command -v pacman &> /dev/null; then
-                sudo pacman -S stow --noconfirm
+                echo "Using pacman package manager..."
+                install_with_manager "pacman" "${missing_packages[@]}"
             elif command -v dnf &> /dev/null; then
-                sudo dnf install stow -y
+                echo "Using dnf package manager..."
+                install_with_manager "dnf" "${missing_packages[@]}"
             else
-                echo "Unsupported package manager. Please install Stow manually."
+                echo "Unsupported package manager. Please install packages manually."
                 exit 1
             fi
             ;;
         "macos")
-            echo "Installing Stow on macOS..."
             if command -v brew &> /dev/null; then
-                brew install stow
+                echo "Using Homebrew package manager..."
+                install_with_manager "brew" "${missing_packages[@]}"
             else
                 echo "Homebrew is not installed. Please install Homebrew manually:"
                 echo "Visit https://brew.sh or run:"
@@ -45,7 +132,7 @@ install_stow() {
             ;;
         "unsupported")
             echo "Unsupported operating system: $OSTYPE"
-            echo "Please install Stow manually and run this script again."
+            echo "Please install packages manually and run this script again."
             exit 1
             ;;
     esac
@@ -69,19 +156,10 @@ install_dotfiles() {
 # Main script execution
 os=$(detect_os)
 echo "Detected OS: $os"
-echo "Installing dotfiles using Stow..."
+echo "Installing dotfiles and essential packages..."
 
-# Check if Stow is installed
-if ! command -v stow &> /dev/null; then
-    echo "Stow is not installed. Installing..."
-    install_stow
-
-    # Verify installation was successful
-    if ! command -v stow &> /dev/null; then
-        echo "Failed to install Stow. Please install it manually and run this script again."
-        exit 1
-    fi
-fi
+# Install all packages
+install_packages
 
 # Prepare dotfiles
 prepare_dotfiles
@@ -89,4 +167,13 @@ prepare_dotfiles
 # Install dotfiles
 install_dotfiles
 
-echo "Dotfiles installation completed."
+echo "Dotfiles and packages installation completed."
+echo ""
+echo "Package status:"
+for package in "${PACKAGES[@]}"; do
+    if command_exists "$package"; then
+        echo "✓ $package"
+    else
+        echo "✗ $package (not found - may have different command name)"
+    fi
+done
