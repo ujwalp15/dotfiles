@@ -1,6 +1,3 @@
-[remote "review"]
-	fetch = +refs/heads/*:refs/remotes/review/*
-	url = ssh://ujwalp@gitreview.eng.vmware.com:29418/nsx-edge-datapath
 [alias]
     aliases = !git config --get-regexp alias | sed -re 's/alias\\.(\\S*)\\s(.*)$/\\1 = \\2/g'
     stat = status -s -uno
@@ -12,14 +9,14 @@
     oops = commit --amend --no-edit
     uncommit = reset --soft HEAD~1
     untrack = rm --cache --
-    pushreview = "! git push ssh://ujwalp@gitreview.eng.vmware.com:29418/$(git config --get remote.origin.url | sed 's#.*/##; s#.git$##') HEAD:refs/for/$(git rev-parse --abbrev-ref HEAD)"
-    pushreviewwip = "! git push ssh://<handle>@gitreview.eng.vmware.com:29418/$(git config --get remote.origin.url | sed -e 's#.*/##; s#.git$##') HEAD:refs/for/$(git rev-parse --abbrev-ref HEAD)%wip"
-    pushreviewprivate = "! git push ssh://<handle>@gitreview.eng.vmware.com:29418/$(git config --get remote.origin.url | sed -e 's#.*/##; s#.git$##') HEAD:refs/for/$(git rev-parse --abbrev-ref HEAD)%private"
+   	pushrw = "!f() { git push ssh://up024312@gitreview-vcfnet.lvn.broadcom.net:29418/$(git config --get remote.origin.url | sed 's#.*/##; s#.git$##') HEAD:refs/for/\"$1\"; }; f"
+   	pushrwwip = "!f() { git push ssh://up024312@gitreview-vcfnet.lvn.broadcom.net:29418/$(git config --get remote.origin.url | sed 's#.*/##; s#.git$##') HEAD:refs/for/\"$1\"%wip; }; f"
+   	pushrwpriv = "!f() { git push ssh://up024312@gitreview-vcfnet.lvn.broadcom.net:29418/$(git config --get remote.origin.url | sed 's#.*/##; s#.git$##') HEAD:refs/for/\"$1\"%private; }; f"
 	related = "!function git_related() { commit1=`git log -n 1 --format=\"%h\" $1` ; commit2=`git log -n 1 --format=\"%h\" $2` ; if git rev-list $commit1 | grep -q $commit2 ; then echo \"$2 is ancestor of $1\" ; elif git rev-list $commit2 | grep -q $commit1 ; then echo \"$1 is ancestor of $2\" ; else echo \"$1 unrelated to $2\" ; fi } ; git_related $1 $2"
 	amend-to = "!f() { SHA=`git rev-parse \"$1\"`; git stash -k && git commit --fixup \"$SHA\" && GIT_SEQUENCE_EDITOR=true git rebase --interactive --autosquash \"$SHA^\" && git stash pop; }; f"
 [user]
-	name = ujwalp
-	email = ujwalp@vmware.com
+	name = Ujwal P
+	email = ujwal.p@broadcom.com
 	signingkey = F02470E0C781369B
 [commit]
 	gpgsign = false
