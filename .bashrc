@@ -106,8 +106,8 @@ export NVM_DIR="$HOME/.nvm"
 export PATH="$PATH:/opt/nvim/:~/bin"
 export NODE_OPTIONS=--max-old-space-size=8192
 
-eval "$(starship init bash)"
 eval "$(zoxide init bash)"
+eval "$(starship init bash)"
 
 # Check if a tmux session exists and attach to it
 if command -v tmux >/dev/null 2>&1; then
