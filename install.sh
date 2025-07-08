@@ -10,6 +10,8 @@ PACKAGES=(
     "bat"
     "fzf"
     "starship"
+    "lazygit"
+    "lazydocker"
 )
 
 # Detect the operating system
