@@ -3,6 +3,7 @@
 # List of additional packages to install
 PACKAGES=(
     "neovim"
+    "tmux"
     "stow"
     "eza"
     "zoxide"
