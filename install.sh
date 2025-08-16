@@ -94,7 +94,10 @@ install_packages() {
 
     # Get missing packages
     local missing_packages
-    readarray -t missing_packages < <(get_missing_packages "${packages_to_install[@]}")
+    missing_packages=()
+    while IFS= read -r line; do
+        missing_packages+=("$line")
+    done < <(get_missing_packages "${packages_to_install[@]}")
 
     if [ ${#missing_packages[@]} -eq 0 ]; then
         echo "All packages are already installed!"
