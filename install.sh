@@ -2,6 +2,7 @@
 
 # List of additional packages to install
 PACKAGES=(
+    "neovim"
     "stow"
     "eza"
     "zoxide"
