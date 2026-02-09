@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Whether to skip package installation (e.g. when no sudo on Linux)
+SKIP_PACKAGES=0
+
 # List of additional packages to install
 PACKAGES=(
     "neovim"
@@ -15,6 +18,19 @@ PACKAGES=(
     "lazygit"
     "lazydocker"
 )
+
+# Check if running as root
+is_root() {
+    [[ "$EUID" -eq 0 ]]
+}
+
+# Check if sudo is available (root or sudo command exists)
+has_sudo() {
+    if is_root; then
+        return 0
+    fi
+    command -v sudo &>/dev/null
+}
 
 # Detect the operating system
 detect_os() {
@@ -78,10 +94,10 @@ install_with_manager() {
         # Install the package quietly, ignore errors
         echo "Installing $actual_package..."
         case $manager in
-            "apt") sudo apt install "$actual_package" -y &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
-            "yum") sudo yum install "$actual_package" -y &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
-            "dnf") sudo dnf install "$actual_package" -y &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
-            "pacman") sudo pacman -S "$actual_package" --noconfirm &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
+            "apt") $SUDO apt install "$actual_package" -y &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
+            "yum") $SUDO yum install "$actual_package" -y &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
+            "dnf") $SUDO dnf install "$actual_package" -y &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
+            "pacman") $SUDO pacman -S "$actual_package" --noconfirm &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
             "brew") brew install "$actual_package" &>/dev/null || echo "Warning: Failed to install $actual_package" ;;
         esac
     done
@@ -89,10 +105,20 @@ install_with_manager() {
 
 # Install packages based on the operating system
 install_packages() {
+    [[ "$SKIP_PACKAGES" -eq 1 ]] && echo "Skipping package installation (run with sudo or install packages manually)." && return
+
     local os=$(detect_os)
     local packages_to_install=("${PACKAGES[@]}")
 
     echo "Checking for missing packages on $os..."
+
+    # On Linux without sudo, only Homebrew (user-space) can install packages
+    if [[ "$os" == "linux" ]] && ! has_sudo && ! command -v brew &>/dev/null; then
+        echo "No sudo access and Homebrew not found. Skipping package installation."
+        echo "Install packages manually: ${PACKAGES[*]}"
+        echo "Or use Homebrew on Linux: https://docs.brew.sh/Homebrew-on-Linux"
+        return
+    fi
 
     # Get missing packages
     local missing_packages
@@ -108,20 +134,24 @@ install_packages() {
 
     case $os in
         "linux")
-            if command -v apt &> /dev/null; then
+            if command -v apt &> /dev/null && has_sudo; then
                 echo "Using apt package manager..."
                 install_with_manager "apt" "${missing_packages[@]}"
-            elif command -v yum &> /dev/null; then
+            elif command -v yum &> /dev/null && has_sudo; then
                 echo "Using yum package manager..."
                 install_with_manager "yum" "${missing_packages[@]}"
-            elif command -v pacman &> /dev/null; then
+            elif command -v pacman &> /dev/null && has_sudo; then
                 echo "Using pacman package manager..."
                 install_with_manager "pacman" "${missing_packages[@]}"
-            elif command -v dnf &> /dev/null; then
+            elif command -v dnf &> /dev/null && has_sudo; then
                 echo "Using dnf package manager..."
                 install_with_manager "dnf" "${missing_packages[@]}"
+            elif command -v brew &> /dev/null; then
+                echo "Using Homebrew (Linux) - no sudo required..."
+                install_with_manager "brew" "${missing_packages[@]}"
             else
-                echo "Unsupported package manager. Please install packages manually."
+                echo "No supported package manager with sufficient privileges."
+                echo "Install packages manually: ${PACKAGES[*]}"
                 exit 1
             fi
             ;;
@@ -161,9 +191,26 @@ install_dotfiles() {
 }
 
 # Main script execution
+# Parse --skip-packages flag
+for arg in "$@"; do
+    case $arg in
+        --skip-packages) SKIP_PACKAGES=1; break ;;
+    esac
+done
+
+# Use sudo for system package managers only when not root
+SUDO=""
+is_root || SUDO="sudo "
+
 os=$(detect_os)
 echo "Detected OS: $os"
 echo "Installing dotfiles and essential packages..."
+
+# Warn if running as root - dotfiles will go to /root
+if is_root; then
+    echo "Note: Running as root. Dotfiles will be installed to /root."
+    echo "For your user account, run this script as your regular user instead."
+fi
 
 # Install all packages
 install_packages
